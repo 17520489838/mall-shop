@@ -12,6 +12,7 @@ import com.mall.dto.OrderDTO;
 import com.mall.dto.QuickOrderDTO;
 import com.mall.entity.*;
 import com.mall.service.OmsOrderService;
+import com.mall.vo.OrderListItemVO;
 import com.mall.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -340,6 +341,39 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         }
         wrapper.orderByDesc(OmsOrder::getCreatedAt);
         return orderDao.selectPage(page, wrapper);
+    }
+
+    @Override
+    public Page<OrderListItemVO> listUserOrdersWithItems(Long userId, Integer status, Integer pageNum, Integer pageSize) {
+        Page<OmsOrder> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<OmsOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OmsOrder::getUserId, userId);
+        if (status != null) {
+            wrapper.eq(OmsOrder::getStatus, status);
+        }
+        wrapper.orderByDesc(OmsOrder::getCreatedAt);
+        Page<OmsOrder> orderPage = orderDao.selectPage(page, wrapper);
+
+        // 批量查询每个订单的商品
+        List<OmsOrder> orders = orderPage.getRecords();
+        if (orders.isEmpty()) {
+            Page<OrderListItemVO> emptyPage = new Page<>(pageNum, pageSize);
+            emptyPage.setRecords(Collections.emptyList());
+            return emptyPage;
+        }
+        List<Long> orderIds = orders.stream().map(OmsOrder::getId).collect(Collectors.toList());
+        List<OmsOrderItem> allItems = orderItemDao.selectList(
+                new LambdaQueryWrapper<OmsOrderItem>().in(OmsOrderItem::getOrderId, orderIds));
+        Map<Long, List<OmsOrderItem>> itemsMap = allItems.stream()
+                .collect(Collectors.groupingBy(OmsOrderItem::getOrderId));
+
+        List<OrderListItemVO> voList = orders.stream()
+                .map(o -> new OrderListItemVO(o, itemsMap.getOrDefault(o.getId(), Collections.emptyList())))
+                .collect(Collectors.toList());
+
+        Page<OrderListItemVO> result = new Page<>(orderPage.getCurrent(), orderPage.getSize(), orderPage.getTotal());
+        result.setRecords(voList);
+        return result;
     }
 
     @Override

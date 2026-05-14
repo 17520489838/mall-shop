@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mall.dto.OrderDTO;
 import com.mall.dto.QuickOrderDTO;
 import com.mall.entity.OmsOrder;
+import com.mall.vo.OrderListItemVO;
 import com.mall.vo.OrderVO;
 
 /**
@@ -56,6 +57,11 @@ public interface OmsOrderService {
      * 获取用户订单列表
      */
     Page<OmsOrder> listUserOrders(Long userId, Integer status, Integer pageNum, Integer pageSize);
+
+    /**
+     * 获取用户订单列表(含商品项)
+     */
+    Page<OrderListItemVO> listUserOrdersWithItems(Long userId, Integer status, Integer pageNum, Integer pageSize);
 
     /**
      * 管理后台: 订单列表

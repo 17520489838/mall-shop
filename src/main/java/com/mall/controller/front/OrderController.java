@@ -6,6 +6,7 @@ import com.mall.dto.OrderDTO;
 import com.mall.dto.QuickOrderDTO;
 import com.mall.entity.OmsOrder;
 import com.mall.service.OmsOrderService;
+import com.mall.vo.OrderListItemVO;
 import com.mall.vo.OrderVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,7 +47,7 @@ public class OrderController {
     public Result<?> listOrders(@RequestParam(required = false) Integer status,
                                 @RequestParam(defaultValue = "1") Integer pageNum,
                                 @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(orderService.listUserOrders(CurrentUserUtils.getUserId(), status, pageNum, pageSize));
+        return Result.success(orderService.listUserOrdersWithItems(CurrentUserUtils.getUserId(), status, pageNum, pageSize));
     }
 
     @GetMapping("/{id}")
