@@ -1,0 +1,114 @@
+# =============================================
+# Mall电商系统 - 主配置文件
+# =============================================
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: mall-system
+
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:mall}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:1374460709Aa}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+    # Redis配置
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    database: 0
+    timeout: 5000
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
+
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+  # 邮件配置
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:2770464101@qq.com}
+    password: ${MAIL_PASSWORD:1374460709Aa}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# MyBatis-Plus配置
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.mall.entity
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:MallSystemSecretKey2024VeryLongAndSecureKey}
+  expiration: ${JWT_EXPIRATION:86400000}       # 默认24小时
+  admin-expiration: ${JWT_ADMIN_EXPIRATION:7200000}  # 管理员token 2小时
+
+# ... existing code ...
+
+# 日志配置
+# ... existing code ...
+
+# 日志配置
+logging:
+  level:
+    com.mall: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    com.baomidou.mybatisplus: DEBUG
+  file:
+    name: logs/mall-system.log
+    max-size: 10MB
+    max-history: 7
+
+# 业务配置
+mall:
+  # 文件上传
+  upload:
+    path: ${UPLOAD_PATH:./upload}
+    max-size: 5242880  # 5MB
+  # 订单配置
+  order:
+    cancel-timeout: 1800000     # 30分钟未支付自动取消
+    receive-timeout: 1296000000 # 15天自动确认收货
+  # 缓存配置
+  cache:
+    product-ttl: 3600    # 商品缓存1小时
+    category-ttl: 7200   # 分类缓存2小时

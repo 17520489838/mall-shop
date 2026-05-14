@@ -1,0 +1,21 @@
+# 生产环境配置
+spring:
+  datasource:
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+
+  redis:
+    lettuce:
+      pool:
+        max-active: 16
+        max-wait: 5000
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+logging:
+  level:
+    com.mall: WARN
+    org.springframework.security: WARN
