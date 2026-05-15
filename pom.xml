@@ -18,7 +18,7 @@
     <description>Mall电商系统后端</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <jjwt.version>0.9.1</jjwt.version>
         <swagger.version>3.0.0</swagger.version>
@@ -65,11 +65,11 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- Maven -->
+        <!-- SpringDoc OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.14</version> <!-- 请检查最新版本 -->
+            <version>1.7.0</version>
         </dependency>
 
         <!-- MySQL -->
@@ -92,6 +92,7 @@
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
         </dependency>
+        <!-- JDK 17+ JAXB support for jjwt -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
@@ -152,8 +153,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>

@@ -360,7 +360,7 @@ CREATE TABLE `sys_config` (
 
 -- 管理员账号: admin / admin123 (BCrypt加密)
 INSERT INTO `ums_admin` (`username`, `password`, `nickname`, `status`) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '系统管理员', 1);
+('admin', '$2b$10$3GnW/JR9X1aPXQeSQmV0A.rmJTtsRlF.IWRumRHWab.L0awqYhwR2', '系统管理员', 1);
 
 -- 初始角色
 INSERT INTO `ums_role` (`name`, `code`, `description`) VALUES
@@ -371,20 +371,25 @@ INSERT INTO `ums_role` (`name`, `code`, `description`) VALUES
 -- 关联管理员和角色
 INSERT INTO `ums_admin_role` (`admin_id`, `role_id`) VALUES (1, 1);
 
--- 初始化菜单数据
+-- 初始化菜单数据 (注意: parent_id 引用的是本条 INSERT 自增生成的 ID)
+-- 自增ID顺序: 仪表盘=1, 商品管理=2, 分类管理=3, 商品列表=4, 订单管理=5, 订单列表=6, 用户管理=7, 用户列表=8, 系统设置=9, 基础配置=10
+-- 按钮权限: 新增商品=11, 编辑商品=12, 删除商品=13, 订单发货=14, 启用禁用=15
 INSERT INTO `ums_menu` (`parent_id`, `name`, `url`, `icon`, `permission`, `type`, `sort_order`) VALUES
 (0, '仪表盘', '/admin/dashboard', 'Dashboard', 'dashboard', 1, 1),
 (0, '商品管理', '/admin/product', 'Goods', 'product:manage', 1, 2),
-(1, '分类管理', '/admin/category', 'Collection', 'product:category:list', 2, 1),
-(1, '品牌管理', '/admin/brand', 'Tag', 'product:brand:list', 2, 2),
-(1, '商品列表', '/admin/product/list', 'List', 'product:list', 2, 3),
+(2, '分类管理', '/admin/category', 'Collection', 'product:category:list', 2, 1),
+(2, '商品列表', '/admin/product/list', 'List', 'product:list', 2, 2),
 (0, '订单管理', '/admin/order', 'Tickets', 'order:manage', 1, 3),
 (5, '订单列表', '/admin/order/list', 'List', 'order:list', 2, 1),
 (0, '用户管理', '/admin/user', 'User', 'user:manage', 1, 4),
 (7, '用户列表', '/admin/user/list', 'List', 'user:list', 2, 1),
-(0, '数据统计', '/admin/statistics', 'DataAnalysis', 'statistics:manage', 1, 5),
-(0, '系统设置', '/admin/system', 'Setting', 'system:manage', 1, 6),
-(10, '基础配置', '/admin/system/config', 'Setting', 'system:config:list', 2, 1);
+(0, '系统设置', '/admin/system', 'Setting', 'system:manage', 1, 5),
+(9, '基础配置', '/admin/system/config', 'Setting', 'system:config:list', 2, 1),
+(2, '新增商品', NULL, NULL, 'product:create', 3, 1),
+(2, '编辑商品', NULL, NULL, 'product:update', 3, 2),
+(2, '删除商品', NULL, NULL, 'product:delete', 3, 3),
+(5, '订单发货', NULL, NULL, 'order:ship', 3, 1),
+(7, '启用禁用', NULL, NULL, 'user:toggle-status', 3, 1);
 
 -- 角色菜单关联 (超级管理员拥有所有菜单)
 INSERT INTO `ums_role_menu` (`role_id`, `menu_id`) SELECT 1, `id` FROM `ums_menu`;

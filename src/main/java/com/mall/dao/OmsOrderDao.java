@@ -30,4 +30,15 @@ public interface OmsOrderDao extends BaseMapper<OmsOrder> {
 
     @Select("SELECT status, COUNT(*) as count FROM oms_order WHERE deleted = 0 GROUP BY status")
     List<Map<String, Object>> selectOrderStatusDistribution();
+
+    @Select("SELECT COUNT(*) FROM oms_order WHERE status = 0 AND deleted = 0")
+    Long selectPendingOrderCount();
+
+    @Select("SELECT COUNT(*) FROM oms_order WHERE status = 1 AND deleted = 0")
+    Long selectPendingShipCount();
+
+    @Select("SELECT DATE_FORMAT(pay_time, '%Y-%m-%d') as date, COALESCE(SUM(pay_amount), 0) as amount " +
+            "FROM oms_order WHERE pay_time >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND status != 0 AND deleted = 0 " +
+            "GROUP BY DATE_FORMAT(pay_time, '%Y-%m-%d') ORDER BY date")
+    List<Map<String, Object>> selectSalesTrend();
 }

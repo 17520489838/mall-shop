@@ -40,5 +40,7 @@ public interface UmsAdminService {
 
     void deleteMenu(Long id);
 
+    List<Long> getRoleMenuIds(Long roleId);
+
     void updateRoleMenus(Long roleId, List<Long> menuIds);
 }

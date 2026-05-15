@@ -27,4 +27,7 @@ public interface PmsProductDao extends BaseMapper<PmsProduct> {
 
     @Update("UPDATE pms_product SET stock = stock - #{quantity} WHERE id = #{productId} AND stock >= #{quantity}")
     int reduceStock(@Param("productId") Long productId, @Param("quantity") int quantity);
+
+    @Select("SELECT * FROM pms_product WHERE stock <= 10 AND deleted = 0 ORDER BY stock ASC LIMIT 10")
+    List<PmsProduct> selectLowStockProducts();
 }

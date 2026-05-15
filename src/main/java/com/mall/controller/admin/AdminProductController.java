@@ -42,7 +42,7 @@ public class AdminProductController {
     }
 
     @PostMapping
-    @PreAuthorize("hasPermission('product:create')")
+    @PreAuthorize("hasAuthority('product:create')")
     @Operation(summary = "新增商品")
     public Result<String> createProduct(@RequestBody PmsProduct product) {
         productService.createProduct(product);
@@ -50,7 +50,7 @@ public class AdminProductController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasPermission('product:update')")
+    @PreAuthorize("hasAuthority('product:update')")
     @Operation(summary = "更新商品")
     public Result<String> updateProduct(@PathVariable Long id, @RequestBody PmsProduct product) {
         product.setId(id);
@@ -59,7 +59,7 @@ public class AdminProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasPermission('product:delete')")
+    @PreAuthorize("hasAuthority('product:delete')")
     @Operation(summary = "删除商品")
     public Result<String> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);

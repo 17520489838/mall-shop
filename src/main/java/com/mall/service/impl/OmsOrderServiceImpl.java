@@ -389,7 +389,15 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                     .or().like(OmsOrder::getReceivePhone, keyword);
         }
         wrapper.orderByDesc(OmsOrder::getCreatedAt);
-        return orderDao.selectPage(page, wrapper);
+        Page<OmsOrder> result = orderDao.selectPage(page, wrapper);
+        // 填充用户名
+        for (OmsOrder order : result.getRecords()) {
+            UmsUser user = userDao.selectById(order.getUserId());
+            if (user != null) {
+                order.setUsername(user.getUsername());
+            }
+        }
+        return result;
     }
 
     @Override

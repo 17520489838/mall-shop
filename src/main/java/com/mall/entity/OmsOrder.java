@@ -110,4 +110,8 @@ public class OmsOrder {
     /** 订单商品列表(非数据库字段) */
     @TableField(exist = false)
     private List<OmsOrderItem> items;
+
+    /** 用户名(非数据库字段，管理后台使用) */
+    @TableField(exist = false)
+    private String username;
 }

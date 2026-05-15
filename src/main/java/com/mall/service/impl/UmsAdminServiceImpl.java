@@ -33,6 +33,8 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     private final UmsAdminDao adminDao;
     private final UmsRoleDao roleDao;
     private final UmsMenuDao menuDao;
+    private final UmsRoleMenuDao roleMenuDao;
+    private final UmsAdminRoleDao adminRoleDao;
     private final OmsOrderDao orderDao;
     private final UmsUserDao userDao;
     private final PmsProductDao productDao;
@@ -41,11 +43,14 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     private final RedisCache redisCache;
 
     public UmsAdminServiceImpl(UmsAdminDao adminDao, UmsRoleDao roleDao, UmsMenuDao menuDao,
+                                UmsRoleMenuDao roleMenuDao, UmsAdminRoleDao adminRoleDao,
                                 OmsOrderDao orderDao, UmsUserDao userDao, PmsProductDao productDao,
                                 PasswordEncoder passwordEncoder, JwtUtils jwtUtils, RedisCache redisCache) {
         this.adminDao = adminDao;
         this.roleDao = roleDao;
         this.menuDao = menuDao;
+        this.roleMenuDao = roleMenuDao;
+        this.adminRoleDao = adminRoleDao;
         this.orderDao = orderDao;
         this.userDao = userDao;
         this.productDao = productDao;
@@ -98,6 +103,10 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     @Override
     public List<UmsMenu> getAdminMenus(Long adminId) {
         List<UmsMenu> allMenus = menuDao.selectByAdminId(adminId);
+        // 过滤掉按钮级权限(type=3)，侧边栏只显示目录和菜单
+        allMenus = allMenus.stream()
+                .filter(m -> m.getType() != null && m.getType() != 3)
+                .collect(Collectors.toList());
         return buildMenuTree(allMenus, 0L);
     }
 
@@ -120,7 +129,14 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         Long productCount = productDao.selectCount(null);
         vo.setTotalProductCount(productCount);
 
+        vo.setPendingOrderCount(orderDao.selectPendingOrderCount());
+        vo.setPendingShipCount(orderDao.selectPendingShipCount());
+
+        // 库存不足商品(stock <= 10)
+        vo.setLowStockProducts(productDao.selectLowStockProducts());
+
         vo.setOrderTrend(orderDao.selectOrderTrend());
+        vo.setSalesTrend(orderDao.selectSalesTrend());
         vo.setOrderStatusDistribution(orderDao.selectOrderStatusDistribution());
 
         // 热销商品TOP10
@@ -182,14 +198,28 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     }
 
     @Override
+    public List<Long> getRoleMenuIds(Long roleId) {
+        return roleMenuDao.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<UmsRoleMenu>()
+                        .eq(UmsRoleMenu::getRoleId, roleId))
+                .stream()
+                .map(UmsRoleMenu::getMenuId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateRoleMenus(Long roleId, List<Long> menuIds) {
-        roleDao.deleteById(roleId);
+        // 删除角色原有的菜单关联
+        roleMenuDao.delete(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<UmsRoleMenu>()
+                .eq(UmsRoleMenu::getRoleId, roleId));
+        // 插入新的菜单关联
         if (menuIds != null && !menuIds.isEmpty()) {
             for (Long menuId : menuIds) {
-                com.mall.entity.UmsAdminRole ar = new com.mall.entity.UmsAdminRole();
-                ar.setAdminId((long) Math.toIntExact(roleId));
-                ar.setRoleId(menuId);
+                UmsRoleMenu rm = new UmsRoleMenu();
+                rm.setRoleId(roleId);
+                rm.setMenuId(menuId);
+                roleMenuDao.insert(rm);
             }
         }
     }

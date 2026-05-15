@@ -71,6 +71,21 @@ public class AdminUserController {
         return Result.success("删除成功");
     }
 
+    // ========== 角色-菜单关联 ==========
+
+    @GetMapping("/roles/{id}/menus")
+    @Operation(summary = "获取角色菜单ID列表")
+    public Result<List<Long>> getRoleMenuIds(@PathVariable Long id) {
+        return Result.success(adminService.getRoleMenuIds(id));
+    }
+
+    @PutMapping("/roles/{id}/menus")
+    @Operation(summary = "更新角色菜单权限")
+    public Result<String> updateRoleMenus(@PathVariable Long id, @RequestBody List<Long> menuIds) {
+        adminService.updateRoleMenus(id, menuIds);
+        return Result.success("权限更新成功");
+    }
+
     // ========== 菜单管理 ==========
 
     @GetMapping("/menus")
