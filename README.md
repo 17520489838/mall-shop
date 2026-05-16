@@ -199,7 +199,7 @@ mall-system/
 ## 🖼️ 项目截图
 
 
-
+截图可见仓库中screenshots文档
 ![商城首页](D:\mall-system\backend\screenshots\fadf0eec06d81b5a9c4010447c962f0b.png)
 *商城首页 — 商品推荐展示、分类导航入口*
 
