@@ -198,18 +198,18 @@ mall-system/
 
 ## 🖼️ 项目截图
 
-> 将截图文件放入仓库根目录的 `screenshots/` 文件夹后替换下方路径。
 
-![商城首页](screenshots/homepage.png)
+
+![商城首页](D:\mall-system\backend\screenshots\fadf0eec06d81b5a9c4010447c962f0b.png)
 *商城首页 — 商品推荐展示、分类导航入口*
 
-![商品详情](screenshots/product-detail.png)
+![商品详情](D:\mall-system\backend\screenshots\95e0c6ae63852eac05d0a0500309b635.png)
 *商品详情页 — 规格选择、评价列表、收藏按钮*
 
-![管理后台仪表盘](screenshots/admin-dashboard.png)
+![管理后台仪表盘](D:\mall-system\backend\screenshots\d8c5db30bf64cc37629bfa081574e41e.png)
 *管理后台 — 数据统计卡片、销售趋势图、热销商品排行*
 
-![管理后台订单管理](screenshots/admin-order.png)
+![管理后台订单管理](D:\mall-system\backend\screenshots\0156f8dd0708ddd8d90395afc8a3fd1c.png)
 *管理后台 — 订单列表搜索、状态筛选、发货操作*
 
 ---
