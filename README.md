@@ -269,7 +269,7 @@ mall-system/
 
 [MIT](LICENSE)
 
-Copyright (c) 2024-present
+Copyright (c) 2026-present
 
 ---
 
