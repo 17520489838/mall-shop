@@ -17,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -180,11 +183,21 @@ public class PmsProductServiceImpl implements PmsProductService {
 
         Page<PmsProduct> result = productDao.selectPage(page, wrapper);
 
-        // 填充分类和品牌名称
-        result.getRecords().forEach(p -> {
-            PmsCategory c = categoryDao.selectById(p.getCategoryId());
-            if (c != null) p.setCategoryName(c.getName());
-        });
+        // 批量填充分类名称（避免 N+1）
+        List<PmsProduct> records = result.getRecords();
+        if (!records.isEmpty()) {
+            List<Long> categoryIds = records.stream()
+                    .map(PmsProduct::getCategoryId).filter(Objects::nonNull).distinct()
+                    .collect(Collectors.toList());
+            Map<Long, String> categoryMap = new HashMap<>();
+            if (!categoryIds.isEmpty()) {
+                categoryDao.selectBatchIds(categoryIds)
+                        .forEach(c -> categoryMap.put(c.getId(), c.getName()));
+            }
+            for (PmsProduct p : records) {
+                p.setCategoryName(categoryMap.get(p.getCategoryId()));
+            }
+        }
 
         return result;
     }
@@ -291,12 +304,33 @@ public class PmsProductServiceImpl implements PmsProductService {
         wrapper.orderByDesc(PmsProduct::getCreatedAt);
 
         Page<PmsProduct> result = productDao.selectPage(page, wrapper);
-        result.getRecords().forEach(p -> {
-            PmsCategory c = categoryDao.selectById(p.getCategoryId());
-            if (c != null) p.setCategoryName(c.getName());
-            PmsBrand b = brandDao.selectById(p.getBrandId());
-            if (b != null) p.setBrandName(b.getName());
-        });
+
+        // 批量填充分类和品牌名称（避免 N+1）
+        List<PmsProduct> records = result.getRecords();
+        if (!records.isEmpty()) {
+            // 批量查分类
+            List<Long> categoryIds = records.stream()
+                    .map(PmsProduct::getCategoryId).filter(Objects::nonNull).distinct()
+                    .collect(Collectors.toList());
+            Map<Long, String> categoryMap = new HashMap<>();
+            if (!categoryIds.isEmpty()) {
+                categoryDao.selectBatchIds(categoryIds)
+                        .forEach(c -> categoryMap.put(c.getId(), c.getName()));
+            }
+            // 批量查品牌
+            List<Long> brandIds = records.stream()
+                    .map(PmsProduct::getBrandId).filter(Objects::nonNull).distinct()
+                    .collect(Collectors.toList());
+            Map<Long, String> brandMap = new HashMap<>();
+            if (!brandIds.isEmpty()) {
+                brandDao.selectBatchIds(brandIds)
+                        .forEach(b -> brandMap.put(b.getId(), b.getName()));
+            }
+            for (PmsProduct p : records) {
+                p.setCategoryName(categoryMap.get(p.getCategoryId()));
+                p.setBrandName(brandMap.get(p.getBrandId()));
+            }
+        }
 
         return result;
     }

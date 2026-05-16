@@ -14,10 +14,10 @@ import java.util.Map;
  */
 public interface OmsOrderDao extends BaseMapper<OmsOrder> {
 
-    @Select("SELECT COUNT(*) FROM oms_order WHERE DATE(created_at) = CURDATE() AND deleted = 0")
+    @Select("SELECT COUNT(*) FROM oms_order WHERE created_at >= CURDATE() AND deleted = 0")
     Long selectTodayOrderCount();
 
-    @Select("SELECT COALESCE(SUM(pay_amount), 0) FROM oms_order WHERE DATE(pay_time) = CURDATE() AND status IN (1,2,3)")
+    @Select("SELECT COALESCE(SUM(pay_amount), 0) FROM oms_order WHERE pay_time >= CURDATE() AND status IN (1,2,3)")
     BigDecimal selectTodaySalesAmount();
 
     @Select("SELECT COUNT(*) FROM oms_order WHERE deleted = 0")

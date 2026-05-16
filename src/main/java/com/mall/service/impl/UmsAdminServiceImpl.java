@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -102,12 +103,21 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public List<UmsMenu> getAdminMenus(Long adminId) {
+        String cacheKey = "mall:admin:menus:" + adminId;
+        List<UmsMenu> cached = redisCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         List<UmsMenu> allMenus = menuDao.selectByAdminId(adminId);
         // 过滤掉按钮级权限(type=3)，侧边栏只显示目录和菜单
         allMenus = allMenus.stream()
                 .filter(m -> m.getType() != null && m.getType() != 3)
                 .collect(Collectors.toList());
-        return buildMenuTree(allMenus, 0L);
+        List<UmsMenu> tree = buildMenuTree(allMenus, 0L);
+
+        redisCache.set(cacheKey, tree, 5, TimeUnit.MINUTES);
+        return tree;
     }
 
     @Override
@@ -117,6 +127,13 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public DashboardVO getDashboardData() {
+        // 尝试从缓存获取（缓存60秒）
+        String cacheKey = "mall:dashboard";
+        DashboardVO cached = redisCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         DashboardVO vo = new DashboardVO();
 
         vo.setTodayOrderCount(orderDao.selectTodayOrderCount());
@@ -151,6 +168,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
             return map;
         }).collect(Collectors.toList()));
 
+        redisCache.set(cacheKey, vo, 60, TimeUnit.SECONDS);
         return vo;
     }
 
@@ -185,16 +203,19 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     @Override
     public void createMenu(UmsMenu menu) {
         menuDao.insert(menu);
+        clearAdminMenuCache();
     }
 
     @Override
     public void updateMenu(UmsMenu menu) {
         menuDao.updateById(menu);
+        clearAdminMenuCache();
     }
 
     @Override
     public void deleteMenu(Long id) {
         menuDao.deleteById(id);
+        clearAdminMenuCache();
     }
 
     @Override
@@ -221,6 +242,22 @@ public class UmsAdminServiceImpl implements UmsAdminService {
                 rm.setMenuId(menuId);
                 roleMenuDao.insert(rm);
             }
+        }
+        clearAdminMenuCache();
+    }
+
+    /**
+     * 清除所有管理员的菜单缓存（菜单结构变化时调用）
+     */
+    private void clearAdminMenuCache() {
+        try {
+            Set<String> keys = redisCache.keys("mall:admin:menus:*");
+            if (keys != null && !keys.isEmpty()) {
+                redisCache.delete(keys);
+                log.info("已清除 {} 个管理员菜单缓存", keys.size());
+            }
+        } catch (Exception e) {
+            log.warn("清除管理员菜单缓存失败", e);
         }
     }
 

@@ -390,11 +390,19 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         }
         wrapper.orderByDesc(OmsOrder::getCreatedAt);
         Page<OmsOrder> result = orderDao.selectPage(page, wrapper);
-        // 填充用户名
-        for (OmsOrder order : result.getRecords()) {
-            UmsUser user = userDao.selectById(order.getUserId());
-            if (user != null) {
-                order.setUsername(user.getUsername());
+        // 批量填充用户名（避免 N+1）
+        List<OmsOrder> orders = result.getRecords();
+        if (!orders.isEmpty()) {
+            List<Long> userIds = orders.stream()
+                    .map(OmsOrder::getUserId).filter(Objects::nonNull).distinct()
+                    .collect(Collectors.toList());
+            if (!userIds.isEmpty()) {
+                Map<Long, String> userMap = userDao.selectBatchIds(userIds).stream()
+                        .collect(Collectors.toMap(UmsUser::getId, UmsUser::getUsername, (a, b) -> a));
+                for (OmsOrder order : orders) {
+                    String username = userMap.get(order.getUserId());
+                    if (username != null) order.setUsername(username);
+                }
             }
         }
         return result;

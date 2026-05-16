@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,6 +92,17 @@ public class RedisCache {
         } catch (Exception e) {
             log.warn("Redis expire failed, key: {}", key);
             return false;
+        }
+    }
+
+    // ========== Key操作 ==========
+
+    public Set<String> keys(String pattern) {
+        try {
+            return redisTemplate.keys(pattern);
+        } catch (Exception e) {
+            log.warn("Redis keys failed, pattern: {}", pattern);
+            return Collections.emptySet();
         }
     }
 
