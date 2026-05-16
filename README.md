@@ -1,4 +1,4 @@
-# cokaki 电商系统 🛍️
+# Cokaki 电商系统 🛍️
 
 <div align="center">
 
